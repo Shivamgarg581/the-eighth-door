@@ -1,68 +1,75 @@
-# THE EIGHTH DOOR
+# THE ROOM
 
-An interactive mystery adventure for the web.
+A cinematic, character-driven conversation website.
 
-## Current build
+## What it is
 
-This repository contains the first complete playable vertical slice:
+The Room is not a conventional chatbot. You ask a question and the site chooses an authored response scene: a character, mood, camera treatment and animated presentation.
 
-- cinematic black-screen prologue
-- seven-door selection corridor
-- seven visual environments
-- interactive clues and hidden events
-- cabin clock puzzle
-- journal/archive
-- field map
-- local progress persistence
-- sound toggle using Web Audio
-- reduced-motion setting
-- Door Eight unlock condition
-- multiple ending classifications
-- responsive mobile layout
-- Vitest unit tests
-- Playwright browser test
-- GitHub Actions quality workflow
+A response can become:
+
+- a quiet close-up
+- a mystery scene
+- an extreme eye shot
+- a silhouette
+- a playful comedy beat
+- a warm reflective conversation
+- a short horror story
+
+The first release intentionally uses a local written library rather than sending every user question to a generative AI API.
+
+## Current release
+
+- cinematic full-screen chat
+- five character personalities
+- question-aware deterministic topic matching
+- authored mini-essays, stories, jokes and reflective answers
+- animated environment changes for calm, warm, mystery, horror and comedy
+- camera choreography: wide, close, profile, silhouette and extreme-eye
+- animated facial reactions while a response is delivered
+- starter questions for instant discovery
+- recent conversation memory stored locally
+- library panel with one-click scene exploration
+- sound toggle
+- responsive mobile UI
+- public About, Library, How It Works, Privacy and Terms pages
+- Vitest and Playwright quality checks
+- GitHub Actions CI
+
+## Content philosophy
+
+The response system is authored and deterministic in this release. The library can be expanded with original writing, public-domain material, properly licensed references and carefully attributed factual content without turning the homepage into a generic AI chat wall.
 
 ## Stack
 
 - Next.js 16.3.5
 - React 19.3.0
 - TypeScript 7.0.2
-- Three.js 0.186.0
 - GSAP 3.15.0
+- Three.js 0.186.0
 - Zustand 5.0.15
 - Vitest
 - Playwright
 
-The first release deliberately uses lightweight procedural CSS/DOM environments so the experience works without a large asset pack. Three.js is included for the next true-3D scene layer.
-
 ## Run locally
 
-1. npm install
-2. npm run dev
-3. Open http://localhost:3000
+1. `npm install`
+2. `npm run dev`
+3. Open `http://localhost:3000`
 
 ## Quality commands
 
-- npm run typecheck
-- npm run test
-- npm run build
-- npm run e2e
+- `npm run typecheck`
+- `npm run test`
+- `npm run build`
+- `npm run e2e`
 
-## Design principles
+## Next upgrades
 
-1. Hide the answer, never hide the logic.
-2. Horror comes from uncertainty, not constant jump scares.
-3. Environmental changes are clues.
-4. The free core mystery remains complete.
-5. The world remembers the player.
-
-## Roadmap
-
-- optimized Three.js forest and mountain scenes
-- full cross-location symbol/meta puzzle
-- deeper secret/event engine
-- anonymous cloud case sync with Supabase
-- spoiler-safe shareable case files
-- production analytics
-- monetization after the core experience is stable
+- richer 2D/3D character rigs
+- more authored response shelves
+- deterministic animation sequences per response
+- optional licensed/public-domain source explorer
+- stronger session memory and preferences
+- anonymous analytics after launch
+- monetization only after the core experience proves useful
