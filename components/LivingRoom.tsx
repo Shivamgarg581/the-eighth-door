@@ -147,7 +147,7 @@ export default function LivingRoom() {
       <div className="room-glow" />
       <div className="room-floor" />
       {active.mood === "horror" && <><div className="fog-strip fog-a" /><div className="fog-strip fog-b" /></>}
-      {active.mood === "funny" && <div className="confetti-field">{Array.from({ length: 18 }).map((_, i) => <i key={i} style={{ "--i": i } as React.CSSProperties} />)}</div>}
+      {active.mood === "funny" && <div className="confetti-field">{Array.from({ length: 18 }).map((_, i) => <i key={i} className={"confetti-piece confetti-" + i} />)}</div>}
       {active.mood === "calm" && <div className="breath-orb" />}
       
       <header className="room-header">
