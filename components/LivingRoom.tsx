@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CHARACTER_META, ROOM_LIBRARY, chooseResponse, type Camera, type CharacterId, type Mood, type RoomResponse } from "@/lib/room-content";
+import { CHARACTER_META, ROOM_LIBRARY, ROOM_OPENING, chooseResponse, type Camera, type CharacterId, type Mood, type RoomResponse } from "@/lib/room-content";
 
 type Turn = { id: number; question: string; response: RoomResponse };
 
@@ -75,7 +75,7 @@ function StoryText({ response, visible }: { response: RoomResponse; visible: boo
 export default function LivingRoom() {
   const [question, setQuestion] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
-  const [active, setActive] = useState<RoomResponse>(ROOM_LIBRARY[ROOM_LIBRARY.length - 1]);
+  const [active, setActive] = useState<RoomResponse>(ROOM_OPENING);
   const [character, setCharacter] = useState<CharacterId>("curator");
   const [speaking, setSpeaking] = useState(false);
   const [showArchive, setShowArchive] = useState(false);
@@ -105,7 +105,7 @@ export default function LivingRoom() {
   useEffect(() => {
     setSpeaking(true);
     const timer = window.setTimeout(() => setSpeaking(false), Math.max(2600, active.lines.length * 820 + 500));
-    soundTone(sound, "appear");
+    if (turnId > 0) soundTone(sound, "appear");
     return () => window.clearTimeout(timer);
   }, [active, sound]);
 
@@ -129,7 +129,7 @@ export default function LivingRoom() {
 
   function resetRoom() {
     setTurns([]);
-    setActive(ROOM_LIBRARY[ROOM_LIBRARY.length - 1]);
+    setActive(ROOM_OPENING);
     setCharacter("curator");
     setQuestion("");
     setTurnId(0);
