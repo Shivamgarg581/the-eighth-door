@@ -4,26 +4,21 @@ export default function AboutPage() {
   return (
     <main className="public-shell">
       <nav className="public-nav">
-        <Link href="/" className="brand">THE EIGHTH DOOR</Link>
-        <div>
-          <Link href="/archive">Archive</Link>
-          <Link href="/cases">Cases</Link>
-          <Link href="/about">About</Link>
-          <Link href="/">Enter</Link>
-        </div>
+        <Link href="/" className="brand">THE ROOM</Link>
+        <div><Link href="/archive">Library</Link><Link href="/cases">How it works</Link><Link href="/about">About</Link><Link href="/">Enter</Link></div>
       </nav>
       <section className="public-hero compact">
-        <span className="micro-line">ABOUT THE EXPERIENCE</span>
-        <h1>Hide the answer.<br />Never hide the logic.</h1>
-        <p>The Eighth Door is a browser-based mystery built around exploration, environmental clues, layered puzzles and a world that remembers what you do.</p>
+        <span className="micro-line">ABOUT THE ROOM</span>
+        <h1>A chatbot where the answer has a scene.</h1>
+        <p>The Room is a cinematic conversation experiment. Your question chooses a character, atmosphere, camera and authored response from a growing library.</p>
       </section>
       <section className="manifesto">
-        <div><span>01</span><h2>Quiet horror</h2><p>No constant jump scares. The fear comes from things being slightly, impossibly wrong.</p></div>
-        <div><span>02</span><h2>Layered puzzles</h2><p>A clue discovered in one place can become the key to another. Observation comes before deduction.</p></div>
-        <div><span>03</span><h2>Living world</h2><p>Return visits can alter scenes, reveal different details and expose deeper secrets.</p></div>
-        <div><span>04</span><h2>Respect the player</h2><p>The free core experience stays playable. Optional support can expand the archive without hiding the logic.</p></div>
+        <div><span>01</span><h2>The character reacts</h2><p>Different subjects bring different personalities: curator, ghost, fool, oracle and dreamer.</p></div>
+        <div><span>02</span><h2>The camera is part of the answer</h2><p>One reply can arrive as a wide shot, a profile, a silhouette or an extreme close-up of one eye.</p></div>
+        <div><span>03</span><h2>Written, not generic</h2><p>The first release uses an authored response library rather than a blank chatbot response stream.</p></div>
+        <div><span>04</span><h2>More shelves over time</h2><p>New stories, jokes, reflections, strange facts and cinematic scenes can be added without rebuilding the whole room.</p></div>
       </section>
-      <footer className="public-footer"><Link href="/">Enter the doors →</Link></footer>
+      <footer className="public-footer"><Link href="/">Enter The Room →</Link></footer>
     </main>
   );
 }
