@@ -48,6 +48,9 @@ export default function EighthDoorExperience() {
   const audioContext = useRef<AudioContext | null>(null);
 
   const currentScene = scene ? SCENES[scene] : null;
+  const sceneClues = scene ? CLUES.filter((clue) => clue.scene === scene) : [];
+  const sceneFound = sceneClues.filter((clue) => save.clues.includes(clue.id)).length;
+  const sceneRemaining = Math.max(0, sceneClues.length - sceneFound);
   const progress = Math.min(100, Math.round((save.clues.length / CLUES.length) * 100));
   const eighthUnlocked = canOpenEighthDoor(save.clues.length, save.solvedPuzzles.length);
   const endingKind = getEnding({ eighthDoor: eighthUnlocked, secrets: save.secrets.length, solvedPuzzles: save.solvedPuzzles.length });
@@ -235,6 +238,11 @@ export default function EighthDoorExperience() {
             <span className="chapter-number">I / VII</span>
             <h1>{save.returnVisit > 1 ? "You came back." : "There are seven doors."}</h1>
             <p>{save.returnVisit > 1 ? "They remember what you chose." : "Choose carefully. You only get one first choice."}</p>
+            <div className="mission-brief corridor-brief">
+              <span>YOUR MISSION</span>
+              <b>Choose a door. Explore the place behind it.</b>
+              <small>Look for marked objects, tap them to collect clues, then use the clues to solve puzzles and unlock the Eighth Door.</small>
+            </div>
           </div>
           <div className="door-hall">
             {DOORS.map((door) => (
@@ -264,6 +272,10 @@ export default function EighthDoorExperience() {
               <span className="scene-kicker">{currentScene.kicker}</span>
               <h1>{currentScene.title}</h1>
               <p>{currentScene.quote}</p>
+              <div className="investigation-status">
+                <span>{sceneRemaining > 0 ? "SEARCH THIS LOCATION" : "LOCATION CLEARED"}</span>
+                <b>{sceneFound}/{sceneClues.length} CLUES FOUND</b>
+              </div>
             </div>
             <div className="hud-right">
               <div className="progress-chip"><span>{progress}%</span><small>CASE</small></div>
@@ -273,6 +285,10 @@ export default function EighthDoorExperience() {
             </div>
           </div>
 
+          <div className="scene-guide">
+            <span className="scene-guide-dot" />
+            <span>{sceneRemaining > 0 ? <>Find the highlighted objects. <b>{sceneRemaining} clue{sceneRemaining === 1 ? "" : "s"} still hidden here.</b></> : <>You found everything here. <b>Use the path or map to investigate another location.</b></>}</span>
+          </div>
           <div className="scene-stage" onClick={() => scene === "forest" && triggerSecret("forest-stillness")}>
             <div className="moon" />
             <div className="mountain-silhouette" />
@@ -281,48 +297,48 @@ export default function EighthDoorExperience() {
 
             {scene === "forest" && <div className="forest-world">
               {Array.from({ length: 13 }).map((_, i) => <span key={i} className={"tree tree-" + (i + 1)} />)}
-              <button className="hotspot hotspot-tree" onClick={(e) => { e.stopPropagation(); discoverClue("forest-tree"); }}>CARVING</button>
-              <button className="hotspot hotspot-bird" onClick={(e) => { e.stopPropagation(); discoverClue("forest-bird"); }}>FOLLOW THE BIRD</button>
-              <button className="hotspot hotspot-note" onClick={(e) => { e.stopPropagation(); discoverClue("forest-note"); }}>WET PAPER</button>
+              <button className="hotspot hotspot-tree" onClick={(e) => { e.stopPropagation(); discoverClue("forest-tree"); }}>FIND · CARVING</button>
+              <button className="hotspot hotspot-bird" onClick={(e) => { e.stopPropagation(); discoverClue("forest-bird"); }}>FIND · FOLLOW THE BIRD</button>
+              <button className="hotspot hotspot-note" onClick={(e) => { e.stopPropagation(); discoverClue("forest-note"); }}>FIND · WET PAPER</button>
               {suspense && <div className="watcher watcher-forest" aria-hidden="true" />}
             </div>}
 
             {scene === "cabin" && <div className="cabin-world">
               <div className="cabin-house"><div className="cabin-roof" /><div className="cabin-wall" /><div className="cabin-window" /><div className="cabin-door" /></div>
               <div className="cabin-table" />
-              <button className="hotspot hotspot-clocks" onClick={(e) => { e.stopPropagation(); discoverClue("cabin-clocks"); setModal("puzzle"); }}>FOUR CLOCKS</button>
-              <button className="hotspot hotspot-mirror" onClick={(e) => { e.stopPropagation(); discoverClue("cabin-mirror"); triggerSecret("mirror-delay"); }}>MIRROR</button>
+              <button className="hotspot hotspot-clocks" onClick={(e) => { e.stopPropagation(); discoverClue("cabin-clocks"); setModal("puzzle"); }}>FIND · FOUR CLOCKS</button>
+              <button className="hotspot hotspot-mirror" onClick={(e) => { e.stopPropagation(); discoverClue("cabin-mirror"); triggerSecret("mirror-delay"); }}>FIND · MIRROR</button>
             </div>}
 
             {scene === "mountain" && <div className="mountain-world">
               <div className="peak peak-a" /><div className="peak peak-b" /><div className="rock-door" />
-              <button className="hotspot hotspot-stone" onClick={(e) => { e.stopPropagation(); discoverClue("mountain-stone"); }}>INSCRIPTION</button>
-              <button className="hotspot hotspot-hollow" onClick={(e) => { e.stopPropagation(); discoverClue("mountain-hollow"); triggerSecret("three-knocks"); }}>KNOCK ×3</button>
+              <button className="hotspot hotspot-stone" onClick={(e) => { e.stopPropagation(); discoverClue("mountain-stone"); }}>FIND · INSCRIPTION</button>
+              <button className="hotspot hotspot-hollow" onClick={(e) => { e.stopPropagation(); discoverClue("mountain-hollow"); triggerSecret("three-knocks"); }}>TRY · KNOCK ×3</button>
             </div>}
 
             {scene === "lake" && <div className="lake-world">
               <div className="lake-surface" /><div className="lake-island" />
-              <button className="hotspot hotspot-reflection" onClick={(e) => { e.stopPropagation(); discoverClue("lake-reflection"); triggerSecret("reflection-first"); }}>LOOK DOWN</button>
-              <button className="hotspot hotspot-stairs" onClick={(e) => { e.stopPropagation(); discoverClue("lake-stairs"); }}>UNDERWATER STEPS</button>
+              <button className="hotspot hotspot-reflection" onClick={(e) => { e.stopPropagation(); discoverClue("lake-reflection"); triggerSecret("reflection-first"); }}>FIND · LOOK DOWN</button>
+              <button className="hotspot hotspot-stairs" onClick={(e) => { e.stopPropagation(); discoverClue("lake-stairs"); }}>FIND · UNDERWATER STEPS</button>
             </div>}
 
             {scene === "village" && <div className="village-world">
               {Array.from({ length: 6 }).map((_, i) => <div key={i} className={"village-house house-" + (i + 1)} />)}
-              <button className="hotspot hotspot-window" onClick={(e) => { e.stopPropagation(); discoverClue("village-window"); triggerSecret("lit-window"); }}>LIT WINDOW</button>
-              <button className="hotspot hotspot-photo" onClick={(e) => { e.stopPropagation(); discoverClue("village-photo"); }}>PHOTOGRAPH</button>
+              <button className="hotspot hotspot-window" onClick={(e) => { e.stopPropagation(); discoverClue("village-window"); triggerSecret("lit-window"); }}>FIND · LIT WINDOW</button>
+              <button className="hotspot hotspot-photo" onClick={(e) => { e.stopPropagation(); discoverClue("village-photo"); }}>FIND · PHOTOGRAPH</button>
             </div>}
 
             {scene === "observatory" && <div className="observatory-world">
               <div className="observatory-dome" /><div className="scope" /><div className="constellation" />
-              <button className="hotspot hotspot-scope" onClick={(e) => { e.stopPropagation(); discoverClue("observatory-scope"); triggerSecret("scope-loop"); }}>LOOK THROUGH</button>
-              <button className="hotspot hotspot-clock" onClick={(e) => { e.stopPropagation(); discoverClue("observatory-clock"); }}>03:17</button>
+              <button className="hotspot hotspot-scope" onClick={(e) => { e.stopPropagation(); discoverClue("observatory-scope"); triggerSecret("scope-loop"); }}>FIND · LOOK THROUGH</button>
+              <button className="hotspot hotspot-clock" onClick={(e) => { e.stopPropagation(); discoverClue("observatory-clock"); }}>FIND · 03:17</button>
             </div>}
 
             {scene === "ruins" && <div className="ruins-world">
               <div className="ruin-arch" /><div className="ruin-wall wall-one" /><div className="ruin-wall wall-two" />
               <div className="symbols">◇ △ ⟟ ⊙ ϟ</div>
-              <button className="hotspot hotspot-symbols" onClick={(e) => { e.stopPropagation(); discoverClue("ruins-symbol"); triggerSecret("symbol-language"); }}>SYMBOLS</button>
-              <button className="hotspot hotspot-eighth" onClick={(e) => { e.stopPropagation(); discoverClue("ruins-eighth"); }}>MISSING INSCRIPTION</button>
+              <button className="hotspot hotspot-symbols" onClick={(e) => { e.stopPropagation(); discoverClue("ruins-symbol"); triggerSecret("symbol-language"); }}>FIND · SYMBOLS</button>
+              <button className="hotspot hotspot-eighth" onClick={(e) => { e.stopPropagation(); discoverClue("ruins-eighth"); }}>FIND · MISSING INSCRIPTION</button>
             </div>}
           </div>
 
