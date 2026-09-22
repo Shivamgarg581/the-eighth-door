@@ -1,22 +1,25 @@
 # Deployment
 
-## Recommended production topology
+GitHub remains the source of truth and Vercel hosts the Next.js app.
 
-GitHub is the source of truth.
+## First production launch
 
-- GitHub: repository, issues, branches and Actions.
-- Vercel: Next.js production hosting and preview deployments.
-- Supabase: optional persistence/analytics backend when cloud state is enabled.
+1. Import `Shivamgarg581/the-eighth-door` into Vercel.
+2. Let Vercel detect Next.js.
+3. Keep the build command as `next build` if prompted.
+4. Deploy `main`.
+5. Verify the homepage, Library, How It Works, About, Privacy and Terms pages.
+6. Test at least one question on desktop and mobile.
+7. Add a custom domain only after the free Vercel deployment is working.
 
-## First production deploy
+## Environment
 
-1. Import Shivamgarg581/the-eighth-door into Vercel.
-2. Set the framework to Next.js if it is not detected automatically.
-3. Keep the build command as next build.
-4. Add only required environment variables from .env.example.
-5. Deploy the main branch.
-6. Verify /, /archive, /cases, /about, /privacy, /terms.
-7. Run a browser pass on desktop and mobile.
-8. Add a custom domain only after the deployed preview is verified.
+The first release does not require a generative-AI API key for its core response flow.
 
-The repository intentionally does not contain production secrets.
+Set `NEXT_PUBLIC_SITE_URL` to the real production URL when you want the sitemap enabled.
+
+## Launch plan
+
+Release the authored core first. Measure real use and collect feedback. Then add deeper characters, richer scene animation, more shelves, optional analytics, cloud memory and monetization in later releases.
+
+No production secret belongs in the repository.
