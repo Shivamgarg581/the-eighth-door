@@ -14,6 +14,23 @@ export type RoomResponse = {
   collection: string;
 };
 
+export const ROOM_OPENING: RoomResponse = {
+  id: "welcome",
+  keywords: [],
+  character: "curator",
+  mood: "calm",
+  camera: "wide",
+  title: "Ask me something.",
+  lines: [
+    "This is not a search box.",
+    "It is a room with a small library of strange answers.",
+    "Ask about a feeling, a book, a movie, a fear, a joke, a mystery—or something only you would think to ask.",
+    "Then watch what happens."
+  ],
+  prompt: "Tell me something strange",
+  collection: "The front desk"
+};
+
 export const ROOM_LIBRARY: RoomResponse[] = [
   {
     id: "meaning-life",
