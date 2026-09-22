@@ -1,41 +1,36 @@
 import Link from "next/link";
 
-const files = [
-  { id: "017-A", title: "The Seven Doors", status: "RECOVERED", text: "A corridor. Seven entrances. One contradiction." },
-  { id: "017-B", title: "The Black Forest", status: "OPEN", text: "The path changes after you leave it." },
-  { id: "017-C", title: "The Hollow Mountain", status: "LOCKED", text: "Three knocks were heard beneath the stone." },
-  { id: "017-D", title: "The Forgotten Lake", status: "LOCKED", text: "The reflection moved before the water did." },
-  { id: "017-E", title: "The Silent Village", status: "LOCKED", text: "Twelve houses. One lit window." },
-  { id: "017-F", title: "The Observatory", status: "LOCKED", text: "The telescope was not pointed at the sky." },
+const shelves = [
+  ["01","Philosophy shelf","Big questions, small answers."],
+  ["02","Midnight cinema","Short horror and strange scenes."],
+  ["03","Heart shelf","Love, loss and the things we cannot neatly explain."],
+  ["04","Comedy drawer","Questions that deserve an eyebrow raise."],
+  ["05","Dream archive","Sleep, imagination and impossible rooms."],
+  ["06","Library","Books, stories and why they stay with us."],
 ];
 
 export default function ArchivePage() {
   return (
     <main className="public-shell">
       <nav className="public-nav">
-        <Link href="/" className="brand">THE EIGHTH DOOR</Link>
-        <div>
-          <Link href="/archive">Archive</Link>
-          <Link href="/cases">Cases</Link>
-          <Link href="/about">About</Link>
-          <Link href="/">Enter</Link>
-        </div>
+        <Link href="/" className="brand">THE ROOM</Link>
+        <div><Link href="/archive">Library</Link><Link href="/cases">How it works</Link><Link href="/about">About</Link><Link href="/">Enter</Link></div>
       </nav>
       <section className="public-hero compact">
-        <span className="micro-line">ARCHIVE · CASE 017</span>
-        <h1>What we found.</h1>
-        <p>Fragments recovered from the world behind the doors.</p>
+        <span className="micro-line">THE WRITTEN LIBRARY</span>
+        <h1>Different questions live on different shelves.</h1>
+        <p>Every shelf is made from authored mini-essays, tiny stories, jokes and cinematic fragments. Your wording decides which shelf opens.</p>
       </section>
       <section className="archive-grid">
-        {files.map((item) => (
-          <article key={item.id} className="archive-card">
-            <span>{item.id} · {item.status}</span>
-            <h2>{item.title}</h2>
-            <p>{item.text}</p>
+        {shelves.map(([id,title,text]) => (
+          <article key={id} className="archive-card">
+            <span>{id} · SHELF</span>
+            <h2>{title}</h2>
+            <p>{text}</p>
           </article>
         ))}
       </section>
-      <footer className="public-footer">Some records only appear after they are discovered.</footer>
+      <footer className="public-footer"><Link href="/">Ask the room ↗</Link></footer>
     </main>
   );
 }
