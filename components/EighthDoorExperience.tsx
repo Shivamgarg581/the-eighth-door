@@ -313,7 +313,7 @@ export default function EighthDoorExperience() {
             {scene === "mountain" && <div className="mountain-world">
               <div className="peak peak-a" /><div className="peak peak-b" /><div className="rock-door" />
               <button className="hotspot hotspot-stone" onClick={(e) => { e.stopPropagation(); discoverClue("mountain-stone"); }}>{hotspotLabel("mountain-stone", "INSCRIPTION")}</button>
-              <button className="hotspot hotspot-hollow" onClick={(e) => { e.stopPropagation(); discoverClue("mountain-hollow"); triggerSecret("three-knocks"); }}{hotspotLabel("mountain-hollow", "KNOCK ×3")}</button>
+              <button className="hotspot hotspot-hollow" onClick={(e) => { e.stopPropagation(); discoverClue("mountain-hollow"); triggerSecret("three-knocks"); }}>{hotspotLabel("mountain-hollow", "KNOCK ×3")}</button>
             </div>}
 
             {scene === "lake" && <div className="lake-world">
