@@ -276,6 +276,9 @@ export default function EighthDoorExperience() {
                 <span>{sceneRemaining > 0 ? "SEARCH THIS LOCATION" : "LOCATION CLEARED"}</span>
                 <b>{sceneFound}/{sceneClues.length} CLUES FOUND</b>
               </div>
+              <div className="search-instruction">
+                {sceneRemaining > 0 ? "TAP THE MARKED OBJECTS TO INVESTIGATE THEM." : "YOU FOUND EVERY CLUE HERE. FOLLOW THE PATH TO CONTINUE."}
+              </div>
             </div>
             <div className="hud-right">
               <div className="progress-chip"><span>{progress}%</span><small>CASE</small></div>
@@ -285,10 +288,6 @@ export default function EighthDoorExperience() {
             </div>
           </div>
 
-          <div className="scene-guide">
-            <span className="scene-guide-dot" />
-            <span>{sceneRemaining > 0 ? <>Find the highlighted objects. <b>{sceneRemaining} clue{sceneRemaining === 1 ? "" : "s"} still hidden here.</b></> : <>You found everything here. <b>Use the path or map to investigate another location.</b></>}</span>
-          </div>
           <div className="scene-stage" onClick={() => scene === "forest" && triggerSecret("forest-stillness")}>
             <div className="moon" />
             <div className="mountain-silhouette" />
