@@ -1,24 +1,34 @@
-# Story bible
+# Content bible
 
-## Premise
+## Product premise
 
-There were seven doors. A visitor finds evidence that an eighth exists.
+The Room is a place where ordinary questions become small cinematic scenes.
 
-## Narrative questions
+The visitor types a question. The written library decides which shelf fits, and the selected shelf chooses a character, mood, camera treatment and response.
 
-1. Why is the visitor late?
-2. Who expected someone else?
-3. Why does the world remember the visitor?
-4. Why do locations repeat in photographs, clocks and reflections?
-5. What is the watcher?
-6. Why does the eighth door keep moving?
+## Character voices
 
-## Tone
+- **The Curator** — observant, literary, quietly strange.
+- **The Guest** — unsettling, ghostly, perfect for horror and mystery.
+- **The Fool** — playful, sarcastic and warm.
+- **The Oracle** — thoughtful, measured and philosophical.
+- **The Dreamer** — soft, reflective and nocturnal.
 
-Quiet, cinematic, mysterious, unsettling.
+## Content direction
 
-Avoid gratuitous gore and repetitive jump scares. The preferred horror mechanism is wrongness: a tiny change that should not be possible.
+Build the library from original writing, public-domain material, properly licensed references, carefully attributed factual content and original cinematic scenarios.
 
-## Canon line
+Do not paste large copyrighted book or movie passages into the library.
 
-"There were seven doors. I found eight."
+## Interaction language
+
+The interface should feel alive without becoming a traditional game:
+- camera can move into the face or a single eye
+- character can disappear or transform
+- lighting and atmosphere respond to the subject
+- dialogue arrives in paced beats
+- recent questions return as echoes
+
+## Long-term idea
+
+More shelves can be added without changing the core chat interface: mythology, science stories, cinema trivia, dream interpretation, comedy, philosophy, folklore, literature and themed characters.
