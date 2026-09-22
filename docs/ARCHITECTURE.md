@@ -1,14 +1,14 @@
 # Architecture
 
-The experience is intentionally split into an application layer, world/scene layer, puzzle/content layer and persistence layer.
+The homepage is a cinematic character-chat experience rather than a game.
 
-- React/Next.js owns the application shell and accessible controls.
-- GSAP owns cinematic sequencing.
-- Three.js is reserved for the next optimized true-3D scene modules.
-- Story content is data-driven in lib/story.ts.
-- Puzzle rules are isolated in lib/puzzles.ts.
-- Local persistence is isolated in lib/storage.ts.
-- Playwright protects the opening journey.
-- Vitest protects deterministic puzzle rules.
+- Next.js/React owns the application shell, composer, archive panel and responsive UI.
+- `components/LivingRoom.tsx` coordinates question submission, local memory, character selection, scene timing and UI state.
+- `lib/room-content.ts` is the authored response library and deterministic topic matcher.
+- CSS supplies the first-release character rig, camera choreography, atmospheric backgrounds and motion.
+- Browser storage keeps the recent conversation locally.
+- GSAP and Three.js remain available for later, richer animation/3D work.
+- Playwright protects the main question-to-response journey.
+- The previous Eighth Door puzzle engine remains in the repository as an archived experiment, but it is not mounted by `app/page.tsx`.
 
-Core principle: hide the answer, never hide the logic.
+The design principle is simple: **the answer should change the room.**
