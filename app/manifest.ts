@@ -2,12 +2,12 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "The Eighth Door",
-    short_name: "Eighth Door",
-    description: "An interactive mystery adventure.",
+    name: "The Room",
+    short_name: "The Room",
+    description: "A cinematic living conversation.",
     start_url: "/",
     display: "standalone",
-    background_color: "#050505",
-    theme_color: "#050505",
+    background_color: "#050506",
+    theme_color: "#050506",
   };
 }
