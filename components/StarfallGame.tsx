@@ -180,7 +180,7 @@ export default function StarfallGame() {
       ctx.strokeStyle = "rgba(154,150,255,.07)";
       ctx.lineWidth = 1;
       for (let i = 0; i < 10; i++) {
-        const y = ((i * 96 + game?.time * 13) % (WORLD.h + 96)) - 48;
+        const y = ((i * 96 + (game?.time ?? 0) * 13) % (WORLD.h + 96)) - 48;
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(WORLD.w, y + 110);
