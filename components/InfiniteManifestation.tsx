@@ -3,90 +3,7 @@
 import { useEffect, useRef } from "react";
 
 const PARTICLES = 120_000;
-
-function shader(gl: WebGL2RenderingContext, type: number, source: string) {
-  const s = gl.createShader(type);
-  if (!s) throw new Error("shader");
-  gl.shaderSource(s, source);
-  gl.compileShader(s);
-  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) || "shader compile");
-  return s;
-}
-
-function program(gl: WebGL2RenderingContext) {
-  const vertex = shader(gl, gl.VERTEX_SHADER, `
-    #version 300 es
-    precision highp float;
-
-    layout(location=0) in vec2 aPosition;
-    layout(location=1) in float aPhase;
-    layout(location=2) in float aSize;
-    layout(location=3) in float aDepth;
-
-    uniform float uTime;
-    uniform float uAspect;
-
-    out float vAlpha;
-    out float vDepth;
-
-    void main() {
-      float t = uTime * (0.11 + aDepth * 0.13);
-      float radius = length(aPosition);
-      float wave = sin(t * 2.4 + aPhase * 8.0 + radius * 12.0);
-      float wave2 = cos(t * 1.7 - aPhase * 5.0 + aPosition.y * 9.0);
-
-      vec2 p = aPosition;
-      p.x += sin(aPosition.y * 5.0 + aPhase * 6.283 + t) * 0.055 * (0.3 + aDepth);
-      p.y += cos(aPosition.x * 4.0 - aPhase * 4.1 - t * 0.8) * 0.04 * (0.25 + aDepth);
-      p *= 1.0 + 0.035 * sin(t + aPhase * 9.0);
-
-      p.x += 0.055 * wave * (1.0 - smoothstep(0.15, 1.7, radius));
-      p.y += 0.038 * wave2 * (1.0 - smoothstep(0.05, 1.6, radius));
-
-      p.x *= (uAspect > 1.0 ? 1.0 : uAspect);
-      gl_Position = vec4(p, aDepth * 0.7, 1.0);
-      gl_PointSize = aSize * (1.0 + 0.42 * sin(t * 1.8 + aPhase * 13.0));
-      vAlpha = 0.22 + 0.78 * (0.5 + 0.5 * sin(t * 1.35 + aPhase * 11.0));
-      vDepth = aDepth;
-    }
-  `);
-
-  const fragment = shader(gl, gl.FRAGMENT_SHADER, `
-    #version 300 es
-    precision highp float;
-
-    in float vAlpha;
-    in float vDepth;
-    out vec4 outColor;
-
-    void main() {
-      vec2 p = gl_PointCoord * 2.0 - 1.0;
-      float d = dot(p,p);
-      if (d > 1.0) discard;
-      float halo = pow(max(0.0, 1.0 - d), 2.6);
-      float core = pow(max(0.0, 1.0 - d * 3.8), 6.0);
-
-      vec3 deep = vec3(0.20, 0.14, 0.42);
-      vec3 light = vec3(0.80, 0.73, 1.00);
-      vec3 warm = vec3(0.95, 0.68, 0.58);
-      float mixA = smoothstep(0.0, 1.0, vDepth);
-      vec3 color = mix(deep, light, halo);
-      color = mix(color, warm, 0.13 * sin(vDepth * 11.0 + gl_FragCoord.y * 0.015));
-
-      outColor = vec4(color, (halo * 0.55 + core * 0.9) * vAlpha * (0.42 + 0.55 * mixA));
-    }
-  `);
-
-  const p = gl.createProgram();
-  if (!p) throw new Error("program");
-  gl.attachShader(p, vertex);
-  gl.attachShader(p, fragment);
-  gl.linkProgram(p);
-  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p) || "program link");
-  gl.deleteShader(vertex);
-  gl.deleteShader(fragment);
-  return p;
-}
+const MOBILE_PARTICLES = 100_000;
 
 export default function InfiniteManifestation() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -95,119 +12,189 @@ export default function InfiniteManifestation() {
     const canvas = ref.current;
     if (!canvas) return;
 
+    const ctx = canvas.getContext("2d", { alpha: false });
+    if (!ctx) return;
+
     let raf = 0;
-    let resize: (() => void) | null = null;
-    const fallback = () => {
-      canvas.classList.add("fallback");
-      canvas.width = Math.max(1, window.innerWidth);
-      canvas.height = Math.max(1, window.innerHeight);
+    let width = 0;
+    let height = 0;
+    let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const count = window.innerWidth < 700 ? MOBILE_PARTICLES : PARTICLES;
+
+    const x = new Float32Array(count);
+    const y = new Float32Array(count);
+    const vx = new Float32Array(count);
+    const vy = new Float32Array(count);
+    const phase = new Float32Array(count);
+    const depth = new Float32Array(count);
+    const size = new Float32Array(count);
+
+    let seed = 1771;
+    const rand = () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 4294967296;
     };
 
-    try {
-      const gl = canvas.getContext("webgl2", {
-        alpha: true,
-        antialias: false,
-        powerPreference: "high-performance",
-        preserveDrawingBuffer: false,
-      });
+    for (let i = 0; i < count; i++) {
+      const a = rand() * Math.PI * 2;
+      const r = Math.pow(rand(), 0.5);
+      x[i] = Math.cos(a) * r;
+      y[i] = Math.sin(a) * r * 0.68;
+      vx[i] = (rand() - 0.5) * 0.00022;
+      vy[i] = (rand() - 0.5) * 0.00022;
+      phase[i] = rand() * Math.PI * 2;
+      depth[i] = rand();
+      size[i] = 0.35 + rand() * 1.8;
+    }
 
-      if (!gl) {
-        fallback();
-        return;
-      }
+    const pointer = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5, active: false };
 
-      let width = 0;
-      let height = 0;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const resize = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      width = Math.max(1, window.innerWidth);
+      height = Math.max(1, window.innerHeight);
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
 
-      resize = () => {
-        width = Math.max(1, Math.floor(window.innerWidth * dpr));
-        height = Math.max(1, Math.floor(window.innerHeight * dpr));
-        canvas.width = width;
-        canvas.height = height;
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        gl.viewport(0, 0, width, height);
-      };
-      resize();
-      window.addEventListener("resize", resize, { passive: true });
+    const move = (event: PointerEvent) => {
+      pointer.tx = event.clientX / width;
+      pointer.ty = event.clientY / height;
+      pointer.active = true;
+    };
+    const leave = () => { pointer.active = false; };
 
-      const p = program(gl);
-      gl.useProgram(p);
+    resize();
+    window.addEventListener("resize", resize, { passive: true });
+    window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("pointerleave", leave, { passive: true });
 
-      const positions = new Float32Array(PARTICLES * 2);
-      const phases = new Float32Array(PARTICLES);
-      const sizes = new Float32Array(PARTICLES);
-      const depths = new Float32Array(PARTICLES);
+    let last = performance.now();
+    let frame = 0;
+    const render = (now: number) => {
+      const dt = Math.min(34, now - last);
+      last = now;
+      frame++;
 
-      let state = 9137;
-      const rand = () => {
-        state = (state * 1664525 + 1013904223) >>> 0;
-        return state / 4294967296;
-      };
+      pointer.x += (pointer.tx - pointer.x) * 0.065;
+      pointer.y += (pointer.ty - pointer.y) * 0.065;
 
-      for (let i = 0; i < PARTICLES; i++) {
-        const theta = rand() * Math.PI * 2;
-        const ring = Math.pow(rand(), 0.58);
-        const spiral = 0.16 * Math.sin(theta * 3.0 + ring * 12.0);
-        const x = Math.cos(theta) * ring * 1.38 + spiral * rand();
-        const y = Math.sin(theta) * ring * 0.92 + 0.15 * Math.sin(theta * 7.0 + ring * 15.0) * rand();
-        positions[i * 2] = x;
-        positions[i * 2 + 1] = y;
-        phases[i] = rand();
-        sizes[i] = 0.7 + rand() * 3.7;
-        depths[i] = rand();
-      }
+      const cx = width * 0.5;
+      const cy = height * 0.49;
+      const scaleX = Math.min(width * 0.62, 980);
+      const scaleY = Math.min(height * 0.46, 620);
+      const mx = (pointer.x - 0.5) * width;
+      const my = (pointer.y - 0.5) * height;
+      const t = now * 0.001;
 
-      const buffers: WebGLBuffer[] = [];
-      const attrs: [number, Float32Array][] = [[0, positions], [1, phases], [2, sizes], [3, depths]];
-      for (const [location, data] of attrs) {
-        const b = gl.createBuffer();
-        if (!b) throw new Error("buffer");
-        gl.bindBuffer(gl.ARRAY_BUFFER, b);
-        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-        gl.enableVertexAttribArray(location);
-        gl.vertexAttribPointer(location, location === 0 ? 2 : 1, gl.FLOAT, false, 0, 0);
-        buffers.push(b);
-      }
+      ctx.fillStyle = "#010106";
+      ctx.fillRect(0, 0, width, height);
 
-      const uTime = gl.getUniformLocation(p, "uTime");
-      const uAspect = gl.getUniformLocation(p, "uAspect");
-      if (!uTime || !uAspect) throw new Error("uniform");
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+      const halo = ctx.createRadialGradient(
+        cx + mx * 0.13,
+        cy + my * 0.13,
+        0,
+        cx + mx * 0.13,
+        cy + my * 0.13,
+        Math.min(width, height) * 0.68
+      );
+      halo.addColorStop(0, "rgba(150,120,255,0.20)");
+      halo.addColorStop(0.34, "rgba(91,72,184,0.08)");
+      halo.addColorStop(0.7, "rgba(38,58,122,0.025)");
+      halo.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = halo;
+      ctx.fillRect(0, 0, width, height);
 
-      const startTime = performance.now();
-      const render = (now: number) => {
-        const time = (now - startTime) * 0.001;
-        gl.clearColor(0, 0, 0, 0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.uniform1f(uTime, time);
-        gl.uniform1f(uAspect, width > height ? height / width : width / height);
-        gl.drawArrays(gl.POINTS, 0, PARTICLES);
-        if (gl.getError() !== gl.NO_ERROR) {
-          fallback();
-          cancelAnimationFrame(raf);
-          return;
+      ctx.globalCompositeOperation = "lighter";
+
+      for (let i = 0; i < count; i++) {
+        const radial = Math.sqrt(x[i] * x[i] + y[i] * y[i]);
+        const ang = phase[i] + t * (0.05 + depth[i] * 0.08);
+        const wave = Math.sin(ang + radial * 9.0) * 0.0007;
+        const curl = Math.cos(ang * 0.73 - radial * 11.0) * 0.0006;
+
+        x[i] += vx[i] + wave * (1 + depth[i]);
+        y[i] += vy[i] + curl * (1 + depth[i]);
+
+        const dx = x[i] - (pointer.x - 0.5) * 0.85;
+        const dy = y[i] - (pointer.y - 0.5) * 0.58;
+        const dist2 = dx * dx + dy * dy + 0.00015;
+
+        if (pointer.active) {
+          const force = 0.0000095 / dist2;
+          x[i] += dx * force * (0.35 + depth[i]);
+          y[i] += dy * force * (0.35 + depth[i]);
         }
-        raf = requestAnimationFrame(render);
-      };
+
+        if (radial > 1.35) {
+          const inv = 0.45 / radial;
+          x[i] *= inv;
+          y[i] *= inv;
+        }
+
+        const px = cx + x[i] * scaleX;
+        const py = cy + y[i] * scaleY;
+        const sparkle = 0.26 + 0.58 * (0.5 + 0.5 * Math.sin(t * (0.7 + depth[i] * 1.3) + phase[i]));
+        const warm = 0.08 + 0.13 * (0.5 + 0.5 * Math.sin(phase[i] * 2 + t * 0.21));
+        const s = size[i] * (0.75 + 0.65 * depth[i]);
+
+        ctx.globalAlpha = sparkle * (0.3 + depth[i] * 0.72);
+        ctx.fillStyle = warm > 0.15 ? "rgba(255,188,208,0.9)" : "rgba(195,180,255,0.9)";
+        ctx.fillRect(px, py, s, s);
+      }
+
+      // Cursor-made gravitational rings.
+      if (pointer.active) {
+        const ringX = width * pointer.x;
+        const ringY = height * pointer.y;
+        for (let r = 0; r < 4; r++) {
+          const rr = 34 + r * 23 + Math.sin(t * 1.8 + r) * 5;
+          ctx.globalAlpha = 0.12 - r * 0.018;
+          ctx.strokeStyle = r % 2 ? "rgba(170,150,255,0.85)" : "rgba(245,170,198,0.75)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(ringX, ringY, rr, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+
+      // A slow, giant "eye" made from light—kept subtle until the pointer gets close.
+      const eyeDx = pointer.x - 0.5;
+      const eyeDy = pointer.y - 0.46;
+      const eyeFocus = pointer.active ? Math.min(1, Math.sqrt(eyeDx * eyeDx + eyeDy * eyeDy) * 3.2) : 0;
+      const eyeAlpha = 0.035 + eyeFocus * 0.09 + (0.5 + 0.5 * Math.sin(t * 0.35)) * 0.018;
+
+      ctx.globalAlpha = eyeAlpha;
+      ctx.strokeStyle = "rgba(214,202,255,0.8)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.ellipse(cx + mx * 0.16, cy + my * 0.16, Math.min(width, height) * 0.22, Math.min(width, height) * 0.07, Math.sin(t * 0.13) * 0.05, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.globalAlpha = eyeAlpha * 1.6;
+      ctx.fillStyle = "rgba(244,222,237,0.9)";
+      ctx.beginPath();
+      ctx.arc(cx + mx * 0.18, cy + my * 0.18, 2.4 + eyeFocus * 3.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.globalCompositeOperation = "source-over";
+      ctx.globalAlpha = 1;
 
       raf = requestAnimationFrame(render);
+    };
 
-      return () => {
-        cancelAnimationFrame(raf);
-        if (resize) window.removeEventListener("resize", resize);
-        for (const b of buffers) gl.deleteBuffer(b);
-        gl.deleteProgram(p);
-      };
-    } catch {
-      if (resize) window.removeEventListener("resize", resize);
-      fallback();
+    raf = requestAnimationFrame(render);
+
+    return () => {
       cancelAnimationFrame(raf);
-      return;
-    }
-  }, []);;
+      window.removeEventListener("resize", resize);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerleave", leave);
+    };
+  }, []);
 
   return <canvas ref={ref} className="manifestation-canvas" aria-hidden="true" />;
 }
