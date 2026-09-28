@@ -95,97 +95,119 @@ export default function InfiniteManifestation() {
     const canvas = ref.current;
     if (!canvas) return;
 
-    const gl = canvas.getContext("webgl2", {
-      alpha: true,
-      antialias: false,
-      powerPreference: "high-performance",
-      preserveDrawingBuffer: false,
-    });
+    let raf = 0;
+    let resize: (() => void) | null = null;
+    const fallback = () => {
+      canvas.classList.add("fallback");
+      canvas.width = Math.max(1, window.innerWidth);
+      canvas.height = Math.max(1, window.innerHeight);
+    };
 
-    if (!gl) {
-      canvas.className = "manifestation-canvas fallback";
+    try {
+      const gl = canvas.getContext("webgl2", {
+        alpha: true,
+        antialias: false,
+        powerPreference: "high-performance",
+        preserveDrawingBuffer: false,
+      });
+
+      if (!gl) {
+        fallback();
+        return;
+      }
+
+      let width = 0;
+      let height = 0;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      resize = () => {
+        width = Math.max(1, Math.floor(window.innerWidth * dpr));
+        height = Math.max(1, Math.floor(window.innerHeight * dpr));
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        gl.viewport(0, 0, width, height);
+      };
+      resize();
+      window.addEventListener("resize", resize, { passive: true });
+
+      const p = program(gl);
+      gl.useProgram(p);
+
+      const positions = new Float32Array(PARTICLES * 2);
+      const phases = new Float32Array(PARTICLES);
+      const sizes = new Float32Array(PARTICLES);
+      const depths = new Float32Array(PARTICLES);
+
+      let state = 9137;
+      const rand = () => {
+        state = (state * 1664525 + 1013904223) >>> 0;
+        return state / 4294967296;
+      };
+
+      for (let i = 0; i < PARTICLES; i++) {
+        const theta = rand() * Math.PI * 2;
+        const ring = Math.pow(rand(), 0.58);
+        const spiral = 0.16 * Math.sin(theta * 3.0 + ring * 12.0);
+        const x = Math.cos(theta) * ring * 1.38 + spiral * rand();
+        const y = Math.sin(theta) * ring * 0.92 + 0.15 * Math.sin(theta * 7.0 + ring * 15.0) * rand();
+        positions[i * 2] = x;
+        positions[i * 2 + 1] = y;
+        phases[i] = rand();
+        sizes[i] = 0.7 + rand() * 3.7;
+        depths[i] = rand();
+      }
+
+      const buffers: WebGLBuffer[] = [];
+      const attrs: [number, Float32Array][] = [[0, positions], [1, phases], [2, sizes], [3, depths]];
+      for (const [location, data] of attrs) {
+        const b = gl.createBuffer();
+        if (!b) throw new Error("buffer");
+        gl.bindBuffer(gl.ARRAY_BUFFER, b);
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(location);
+        gl.vertexAttribPointer(location, location === 0 ? 2 : 1, gl.FLOAT, false, 0, 0);
+        buffers.push(b);
+      }
+
+      const uTime = gl.getUniformLocation(p, "uTime");
+      const uAspect = gl.getUniformLocation(p, "uAspect");
+      if (!uTime || !uAspect) throw new Error("uniform");
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+
+      const startTime = performance.now();
+      const render = (now: number) => {
+        const time = (now - startTime) * 0.001;
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform1f(uTime, time);
+        gl.uniform1f(uAspect, width > height ? height / width : width / height);
+        gl.drawArrays(gl.POINTS, 0, PARTICLES);
+        if (gl.getError() !== gl.NO_ERROR) {
+          fallback();
+          cancelAnimationFrame(raf);
+          return;
+        }
+        raf = requestAnimationFrame(render);
+      };
+
+      raf = requestAnimationFrame(render);
+
+      return () => {
+        cancelAnimationFrame(raf);
+        if (resize) window.removeEventListener("resize", resize);
+        for (const b of buffers) gl.deleteBuffer(b);
+        gl.deleteProgram(p);
+      };
+    } catch {
+      if (resize) window.removeEventListener("resize", resize);
+      fallback();
+      cancelAnimationFrame(raf);
       return;
     }
-
-    let raf = 0;
-    let width = 0;
-    let height = 0;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const resize = () => {
-      width = Math.max(1, Math.floor(window.innerWidth * dpr));
-      height = Math.max(1, Math.floor(window.innerHeight * dpr));
-      canvas.width = width;
-      canvas.height = height;
-      canvas.style.width = "100%";
-      canvas.style.height = "100%";
-      gl.viewport(0, 0, width, height);
-    };
-    resize();
-    window.addEventListener("resize", resize, { passive: true });
-
-    const p = program(gl);
-    gl.useProgram(p);
-
-    const positions = new Float32Array(PARTICLES * 2);
-    const phases = new Float32Array(PARTICLES);
-    const sizes = new Float32Array(PARTICLES);
-    const depths = new Float32Array(PARTICLES);
-
-    let state = 9137;
-    const rand = () => {
-      state = (state * 1664525 + 1013904223) >>> 0;
-      return state / 4294967296;
-    };
-
-    for (let i = 0; i < PARTICLES; i++) {
-      const theta = rand() * Math.PI * 2;
-      const ring = Math.pow(rand(), 0.58);
-      const spiral = 0.16 * Math.sin(theta * 3.0 + ring * 12.0);
-      const x = Math.cos(theta) * ring * 1.38 + spiral * rand();
-      const y = Math.sin(theta) * ring * 0.92 + 0.15 * Math.sin(theta * 7.0 + ring * 15.0) * rand();
-      positions[i * 2] = x;
-      positions[i * 2 + 1] = y;
-      phases[i] = rand();
-      sizes[i] = 0.7 + rand() * 3.7;
-      depths[i] = rand();
-    }
-
-    const buffers: WebGLBuffer[] = [];
-    const attrs: [number, Float32Array][] = [[0, positions],[1, phases],[2, sizes],[3, depths]];
-    for (const [location, data] of attrs) {
-      const b = gl.createBuffer();
-      if (!b) throw new Error("buffer");
-      gl.bindBuffer(gl.ARRAY_BUFFER, b);
-      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(location);
-      gl.vertexAttribPointer(location, location === 0 ? 2 : 1, gl.FLOAT, false, 0, 0);
-      buffers.push(b);
-    }
-
-    const uTime = gl.getUniformLocation(p, "uTime");
-    const uAspect = gl.getUniformLocation(p, "uAspect");
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-
-    const start = performance.now();
-    const render = (now: number) => {
-      const time = (now - start) * 0.001;
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.uniform1f(uTime, time);
-      gl.uniform1f(uAspect, width > height ? height / width : width / height);
-      gl.drawArrays(gl.POINTS, 0, PARTICLES);
-      raf = requestAnimationFrame(render);
-    };
-    raf = requestAnimationFrame(render);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
-      for (const b of buffers) gl.deleteBuffer(b);
-      gl.deleteProgram(p);
-    };
-  }, []);
+  }, []);;
 
   return <canvas ref={ref} className="manifestation-canvas" aria-hidden="true" />;
 }
